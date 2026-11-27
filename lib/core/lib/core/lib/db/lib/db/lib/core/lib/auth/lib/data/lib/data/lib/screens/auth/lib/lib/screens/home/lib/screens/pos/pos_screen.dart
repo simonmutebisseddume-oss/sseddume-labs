@@ -49,9 +49,16 @@ class _PosScreenState extends State<PosScreen> {
     });
   }
 
+  int? _readQtyMicro(String raw, ProductUnit unit) {
+    final parsed = parseMicro(raw);
+    if (parsed == null || parsed <= 0) return null;
+    if (!unit.allowFraction && parsed % kMicro != 0) return null;
+    return parsed;
+  }
+
   Future<void> _openUnitPicker(Product product) async {
     var selectedUnit = product.defaultUnit;
-    final qtyCtrl = TextEditingController(text: selectedUnit.allowFraction ? '1' : '1');
+    final qtyCtrl = TextEditingController(text: '1');
     String? err;
 
     final added = await showModalBottomSheet<bool>(
@@ -78,9 +85,10 @@ class _PosScreenState extends State<PosScreen> {
                       onSelected: (_) {
                         setModalState(() {
                           selectedUnit = u;
+                          err = null;
                           if (!u.allowFraction) {
-                            final currentMicro = parseQtyMicro(qtyCtrl.text, allowFraction: true) ?? kMicro;
-                            final whole = (currentMicro / kMicro).round().clamp(1, 999999);
+                            final current = parseMicro(qtyCtrl.text) ?? kMicro;
+                            final whole = (current / kMicro).round().clamp(1, 999999);
                             qtyCtrl.text = '$whole';
                           }
                         });
@@ -101,9 +109,11 @@ class _PosScreenState extends State<PosScreen> {
               const SizedBox(height: 16),
               FilledButton(
                 onPressed: () {
-                  final micro = parseQtyMicro(qtyCtrl.text, allowFraction: selectedUnit.allowFraction);
-                  if (micro == null || micro <= 0) {
-                    setModalState(() => err = 'Enter a valid quantity greater than zero.');
+                  final micro = _readQtyMicro(qtyCtrl.text, selectedUnit);
+                  if (micro == null) {
+                    setModalState(() => err = selectedUnit.allowFraction
+                        ? 'Enter a valid quantity greater than zero.'
+                        : 'Enter a whole number greater than zero.');
                     return;
                   }
                   Navigator.pop(ctx, true);
@@ -117,7 +127,7 @@ class _PosScreenState extends State<PosScreen> {
     );
 
     if (added == true) {
-      final micro = parseQtyMicro(qtyCtrl.text, allowFraction: selectedUnit.allowFraction) ?? 0;
+      final micro = _readQtyMicro(qtyCtrl.text, selectedUnit) ?? 0;
       _addOrMergeLine(product, selectedUnit, micro);
     }
     qtyCtrl.dispose();
@@ -328,7 +338,7 @@ class _PosScreenState extends State<PosScreen> {
               const SizedBox(height: 16),
               FilledButton(
                 onPressed: () {
-                  final amt = int.tryParse(amountCtrl.text.trim()) ?? 0;
+                  final amt = int.tryParse(amountCtrl.text.replaceAll(',', '').trim()) ?? 0;
                   if (amt != _total) {
                     setModalState(() => err = 'Enter exact total (${fmtUgx(_total)}) to complete sale.');
                     return;
