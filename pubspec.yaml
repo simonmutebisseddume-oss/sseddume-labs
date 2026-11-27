@@ -1,0 +1,38 @@
+name: sseddume_labs
+description: Sseddume Labs - Offline-First Multi-Business & Multi-Shop Management System
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # Cloud Realtime Sync (WhatsApp / MT5 speed)
+  supabase_flutter: ^2.8.0
+  # Offline-First Local Database & Secure Storage (Android & Windows compatible)
+  sqlite3: ^3.1.0
+  path_provider: ^2.1.5
+  path: ^1.9.0
+  flutter_secure_storage: ^9.2.2
+  uuid: ^4.5.1
+  connectivity_plus: ^6.1.0
+  # Offline Camera Barcode / QR Scanner (Bundled ML Kit)
+  mobile_scanner: ^6.0.2
+  # Custom Barcode Generator + Sticker PDF & Thermal Printing
+  barcode: ^2.2.8
+  barcode_widget: ^2.0.4
+  pdf: ^3.11.1
+  printing: ^5.13.4
+  # Formatting & Instant Luganda/English Switching
+  intl: ^0.19.0
+  provider: ^6.1.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
